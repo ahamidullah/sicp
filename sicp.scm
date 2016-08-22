@@ -212,3 +212,57 @@
 			(filtered-accumulate combiner null-value term (next a) next b filter))))
 (define (sum-prime-square a b)
 	(filtered-accumulate add-acc 0 square a inc b prime?))
+
+;; 1.35
+(define tolerance 0.00001)
+(define (fixed-point f first-guess)
+	(define (close-enough? v1 v2)
+		(< (abs (- v1 v2)) tolerance))
+	(define (try guess)
+		(display guess)
+		(newline)
+		(let ((next (f guess)))
+		(if (close-enough? guess next)
+			next
+			(try next))))
+	(try first-guess))
+
+(define (golden-ratio)
+	(fixed-point (lambda (x) (+ 1 (/ 1 x))) 1.0))
+
+;; 1.36
+(define (x-fixed-pt)
+	(fixed-point (lambda (x) (/ (log 1000) (log x))) 2.0))
+
+(define (x-fixed-pt-damp)
+	(fixed-point (lambda (x) (average x (/ (log 1000) (log x)))) 8.0))
+
+;; 1.37
+(define (cont-frac n d k)
+	(define (term i)
+		(if (>= i k)
+			(/ (n i) (d i))
+			(/ (n i) (+ (d i) (term (+ i 1))))))
+	(define (term-iter i ans)
+		(if (<= i 1)
+			(/ (n 1) ans)
+			(term-iter (- i 1) (+ (d (- i 1)) (/ (n i) ans)))))
+	(term 1))
+	;;(term-iter k (d k)))
+
+(define (one-over-golden k)
+	(cont-frac (lambda (i) 1.0) (lambda (i) 1.0) k))
+
+;; 1.38
+(define (e-cf)
+	(define (d-func i)
+		(if (or (= i 1) (not (= (modulo (- i 2) 3) 0)))
+			1
+			(* (+ (/ (- i 1) 3) 1) 2)))
+	(+ 2 (cont-frac (lambda (i) 1.0) d-func 1000)))
+
+;; 1.39
+(define (tan-cf x-int k)
+	(let ((x (exact->inexact x-int)))
+	(cont-frac (lambda (i) (if (= i 1) x (- (expt x 2)))) (lambda (i) (+ i (- i 1))) k)))
+
