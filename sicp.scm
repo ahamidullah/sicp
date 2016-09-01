@@ -266,3 +266,45 @@
 	(let ((x (exact->inexact x-int)))
 	(cont-frac (lambda (i) (if (= i 1) x (- (expt x 2)))) (lambda (i) (+ i (- i 1))) k)))
 
+;; 1.40
+(define dx 0.00001)
+(define (deriv g)
+	(lambda (x) (/ (- (g (+ x dx)) (g x)) dx)))
+(define (newton-transform g)
+	(lambda (x) (- x (/ (g x) ((deriv g) x)))))
+(define (newtons-method g guess)
+	(fixed-point (newton-transform g) guess))
+(define (cubic a b c)
+	(lambda (x) (+ (+ (+ (expt x 3) (* a (expt x 2))) (* b x)) c)))
+
+;; 1.41
+(define (double f)
+	(lambda (x) (f (f x))))
+
+;; 1.42
+(define (compose f g)
+	(lambda (x) (f (g x))))
+
+;; 1.43
+(define (repeated f count)
+	(lambda (x) (if (> count 0) ((repeated f (- count 1)) (f x)) x)))
+
+(define (id x) x)
+(define (repeated-2 f count)
+	(if (> count 0) (compose (repeated-2 f (- count 1)) f) id))
+
+;; 1.44
+(define (average-3 x y z)
+	(/ (+ (+ x y) z) 3))
+(define (smooth f)
+	(lambda (x) (average-3 (f (- x dx)) (f x) (f (+ x dx)))))
+(define (n-fold-smooth f n)
+	(repeated (smooth f) n))
+
+;; 2.1
+(define (make-rat n d)
+	(let* ((g (gcd n d))
+	       (gcd-n (/ n g))
+	       (gcd-d (/ d g)))
+	(if (< gcd-d 0) (cons (- gcd-n) (- gcd-d)) (cons gcd-n gcd-d))))
+
